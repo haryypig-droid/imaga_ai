@@ -14,7 +14,7 @@ st.set_page_config(page_title="Kids Story Generator", page_icon="🧸", layout="
 @st.cache_resource
 def load_caption_model():
     """Loads the Hugging Face image captioning pipeline."""
-    return pipeline("image-to-text", model="Salesforce/blip-image-captioning-base")
+    return pipeline("image-text-to-text", model="Salesforce/blip-image-captioning-base")
 
 
 @st.cache_resource
