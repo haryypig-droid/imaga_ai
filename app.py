@@ -21,7 +21,7 @@ def load_caption_model():
 def load_story_model():
     """Loads the Hugging Face text generation pipeline."""
     # Using flan-t5-base as it is excellent at following instructions for specific audiences (like kids).
-    return pipeline("text2text-generation", model="google/flan-t5-base")
+    return pipeline(model="google/flan-t5-base")
 
 
 # --- Application Logic Functions ---
