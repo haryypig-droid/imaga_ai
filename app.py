@@ -1,5 +1,5 @@
 import streamlit as st
-from transformers import pipeline
+from transformers import pipeline, AutoTokenizer, AutoModelForSeq2SeqLM
 from PIL import Image
 from gtts import gTTS
 import tempfile
@@ -19,9 +19,12 @@ def load_caption_model():
 
 @st.cache_resource
 def load_story_model():
-    """Loads the Hugging Face text generation pipeline."""
-    # Using flan-t5-base as it is excellent at following instructions for specific audiences (like kids).
-    return pipeline(model="google/flan-t5-base")
+    """Loads the Hugging Face text generation model and tokenizer directly."""
+    tokenizer = AutoTokenizer.from_pretrained("google/flan-t5-base")
+    model = AutoModelForSeq2SeqLM.from_pretrained("google/flan-t5-base")
+    
+    # We return both so the generation function can use them
+    return tokenizer, model
 
 
 # --- Application Logic Functions ---
@@ -31,9 +34,19 @@ def generate_image_caption(image, caption_pipeline):
     return result[0]['generated_text']
 
 
-def generate_kids_story(caption, story_pipeline):
+def generate_kids_story(caption, story_model_components):
     """Expands the caption into a 50-100 word story for 3-10 year olds."""
+    tokenizer, model = story_model_components
     prompt = f"Write a fun, imaginative story for a 5-year-old child about this: {caption}. Keep it between 50 and 100 words."
+    
+    # 1. Translate the prompt text into AI tokens
+    inputs = tokenizer(prompt, return_tensors="pt")
+    
+    # 2. Generate the story tokens
+    outputs = model.generate(**inputs, max_new_tokens=150, do_sample=True, temperature=0.7)
+    
+    # 3. Decode the tokens back into readable English text
+    return tokenizer.decode(outputs[0], skip_special_tokens=True)
 
     # max_new_tokens is constrained to ensure the story length fits the 50-100 word requirement
     result = story_pipeline(prompt, max_new_tokens=150, do_sample=True, temperature=0.7)
