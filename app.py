@@ -27,7 +27,7 @@ def load_story_model():
 # --- Application Logic Functions ---
 def generate_image_caption(image, caption_pipeline):
     """Generates a caption from the uploaded image."""
-    result = caption_pipeline(image)
+    result = caption_pipeline(image, text="")
     return result[0]['generated_text']
 
 
